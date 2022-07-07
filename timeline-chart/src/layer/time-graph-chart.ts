@@ -823,7 +823,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (model) {
             selectRow(model);
         } else if (row && !model) {
-            // If we're here, the user scrolled down too fast and tried to select before the row loaded.
+            // If we're here, the user scrolled down too fast and tried to select a row before it loaded.
             // Just wait half a second and call again.
             setTimeout(() => this.selectRowFromId(id), 500);
         }
