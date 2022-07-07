@@ -39,13 +39,12 @@ const VISIBLE_ROW_BUFFER = 3; // number of buffer rows above and below visible r
 const FINE_RESOLUTION_FACTOR = 1; // fine resolution factor or default to disable coarse update
 
 export class TimeGraphChart extends TimeGraphChartLayer {
-
     protected rowIds: number[]; // complete ordered list of rowIds
     protected rowComponents: Map<number, TimeGraphRow> = new Map(); // map of rowId to row component
     protected mouseInteractions: TimeGraphMouseInteractions;
     protected selectedStateModel: TimelineChart.TimeGraphState | undefined;
     protected selectedStateChangedHandler: ((el: TimelineChart.TimeGraphState | undefined) => void)[] = [];
-    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange, resolution: number, rowIds: number[] } | undefined;
+    protected ongoingRequest: { viewRange: TimelineChart.TimeGraphRange; resolution: number; rowIds: number[] } | undefined;
 
     protected isNavigating: boolean;
 
@@ -63,13 +62,13 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _stageMouseMoveHandler: Function;
     private _stageMouseUpHandler: Function;
 
-    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
-    private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };
-    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void; };
-    private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void; };
-    private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void; };
-    private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void; };
-    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void; };
+    private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void };
+    private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void };
+    private _mouseDownHandler: { (event: MouseEvent): void; (event: Event): void };
+    private _keyDownHandler: { (event: KeyboardEvent): void; (event: Event): void };
+    private _keyUpHandler: { (event: KeyboardEvent): void; (event: Event): void };
+    private _mouseWheelHandler: { (ev: WheelEvent): void; (event: Event): void; (event: Event): void };
+    private _contextMenuHandler: { (e: MouseEvent): void; (event: Event): void };
 
     private _debouncedMaybeFetchNewData = debounce(() => this.maybeFetchNewData(false), 400);
     private _debouncedMaybeFetchNewDataFine = debounce(() => this.maybeFetchNewData(false, true), 400);
@@ -81,10 +80,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     private _mouseClicks = 0;
     private _multiClickTimer: DebouncedFunc<() => void>;
 
-    constructor(id: string,
-        protected providers: TimeGraphChartProviders,
-        protected rowController: TimeGraphRowController,
-        private _coarseResolutionFactor = FINE_RESOLUTION_FACTOR) {
+    constructor(id: string, protected providers: TimeGraphChartProviders, protected rowController: TimeGraphRowController, private _coarseResolutionFactor = FINE_RESOLUTION_FACTOR) {
         super(id, rowController);
         this.isNavigating = false;
     }
@@ -100,19 +96,17 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         const zoomTime = zoomPosition / this.stateController.zoomFactor;
         const zoomMagnitude = hasZoomedIn ? 0.8 : 1.25;
-        const newViewRangeLength = BIMath.clamp(Number(this.unitController.viewRangeLength) * zoomMagnitude,
-            BigInt(2), this.unitController.absoluteRange);
+        const newViewRangeLength = BIMath.clamp(Number(this.unitController.viewRangeLength) * zoomMagnitude, BigInt(2), this.unitController.absoluteRange);
         const center = this.unitController.viewRange.start + BIMath.round(zoomTime);
-        const start = BIMath.clamp(Number(center) - zoomTime * Number(newViewRangeLength) / Number(this.unitController.viewRangeLength),
-            BigInt(0), this.unitController.absoluteRange - newViewRangeLength);
+        const start = BIMath.clamp(Number(center) - (zoomTime * Number(newViewRangeLength)) / Number(this.unitController.viewRangeLength), BigInt(0), this.unitController.absoluteRange - newViewRangeLength);
         const end = start + newViewRangeLength;
         if (start !== end) {
             this.unitController.viewRange = {
                 start,
                 end
-            }
+            };
         }
-    };
+    }
 
     protected afterAddToContainer() {
         this.stage.cursor = 'default';
@@ -127,25 +121,23 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             // move by at least one nanosecond
             const absOffset = BIMath.max(1, Math.abs(magnitude / this.stateController.zoomFactor));
             const timeOffset = magnitude > 0 ? absOffset : -absOffset;
-            const start = BIMath.clamp(this.unitController.viewRange.start + timeOffset,
-                BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
+            const start = BIMath.clamp(this.unitController.viewRange.start + timeOffset, BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
             const end = start + this.unitController.viewRangeLength;
             this.unitController.viewRange = {
                 start,
                 end
-            }
-        }
+            };
+        };
 
         const panHorizontally = (magnitude: number) => {
             const timeOffset = BIMath.round(magnitude / this.stateController.zoomFactor);
-            const start = BIMath.clamp(this.mousePanningStart - timeOffset,
-                BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
+            const start = BIMath.clamp(this.mousePanningStart - timeOffset, BigInt(0), this.unitController.absoluteRange - this.unitController.viewRangeLength);
             const end = start + this.unitController.viewRangeLength;
             this.unitController.viewRange = {
                 start,
                 end
-            }
-        }
+            };
+        };
 
         const moveVertically = (magnitude: number) => {
             if (this.rowController.totalHeight <= this.stateController.canvasDisplayHeight) {
@@ -156,7 +148,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 verticalOffset = this.rowController.totalHeight - this.stateController.canvasDisplayHeight;
             }
             this.rowController.verticalOffset = verticalOffset;
-        }
+        };
 
         this._mouseMoveHandler = (event: MouseEvent) => {
             mousePositionX = event.offsetX;
@@ -167,8 +159,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (triggerKeyEvent) {
                 if (keyPressed === 'Control' && this.mouseButtons === 0 && !event.shiftKey && !event.altKey) {
                     this.stage.cursor = 'grabbing';
-                } else if (this.stage.cursor === 'grabbing' && !this.mousePanning &&
-                    (keyPressed === 'Shift' || keyPressed === 'Alt')) {
+                } else if (this.stage.cursor === 'grabbing' && !this.mousePanning && (keyPressed === 'Shift' || keyPressed === 'Alt')) {
                     this.stage.cursor = 'default';
                 }
                 if (keyBoardNavs['zoomin'].indexOf(keyPressed) >= 0) {
@@ -215,12 +206,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._stageMouseDownHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             // if only middle button or only Ctrl+left button is pressed
-            if ((event.data.button !== 1 || event.data.buttons !== 4) &&
-                (event.data.button !== 0 || event.data.buttons !== 1 ||
-                    !event.data.originalEvent.ctrlKey ||
-                    event.data.originalEvent.shiftKey ||
-                    event.data.originalEvent.altKey ||
-                    this.stage.cursor !== 'grabbing')) {
+            if ((event.data.button !== 1 || event.data.buttons !== 4) && (event.data.button !== 0 || event.data.buttons !== 1 || !event.data.originalEvent.ctrlKey || event.data.originalEvent.shiftKey || event.data.originalEvent.altKey || this.stage.cursor !== 'grabbing')) {
                 return;
             }
             this.mousePanning = true;
@@ -234,8 +220,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this._stageMouseMoveHandler = (event: PIXI.InteractionEvent) => {
             this.mouseButtons = event.data.buttons;
             if (this.mousePanning) {
-                if ((this.mouseDownButton == 1 && (this.mouseButtons & 4) === 0) ||
-                    (this.mouseDownButton == 0 && (this.mouseButtons & 1) === 0)) {
+                if ((this.mouseDownButton == 1 && (this.mouseButtons & 4) === 0) || (this.mouseDownButton == 0 && (this.mouseButtons & 1) === 0)) {
                     // handle missed button mouseup event
                     this.mousePanning = false;
                     const orig = event.data.originalEvent;
@@ -271,7 +256,6 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             if (ev.ctrlKey) {
                 const hasZoomedIn = ev.deltaY < 0;
                 this.adjustZoom(ev.offsetX, hasZoomedIn);
-
             } else if (ev.shiftKey) {
                 moveHorizontally(ev.deltaY);
             } else {
@@ -314,7 +298,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     this.unitController.viewRange = {
                         start: newViewStart,
                         end: newViewEnd
-                    }
+                    };
                 }
                 this.stage.cursor = 'default';
                 document.removeEventListener('mouseup', mouseUpListener);
@@ -329,7 +313,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         this.onCanvasEvent('wheel', this._mouseWheelHandler);
         this.onCanvasEvent('contextmenu', this._contextMenuHandler);
 
-        this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
+        this.rowController.onVerticalOffsetChangedHandler((verticalOffset) => {
             this.layer.position.y = -verticalOffset;
             this._debouncedMaybeFetchNewData();
         });
@@ -442,7 +426,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
             }
             // create placeholder rows
-            this.rowIds.forEach(rowId => {
+            this.rowIds.forEach((rowId) => {
                 if (!this.rowComponents.get(rowId)) {
                     this.addRow(rowId);
                 }
@@ -451,17 +435,12 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const visibleRowIds = this.getVisibleRowIds(VISIBLE_ROW_BUFFER);
         const viewRange = this.unitController.viewRange;
         const resolutionFactor = fine ? FINE_RESOLUTION_FACTOR : this._coarseResolutionFactor;
-        const resolution = resolutionFactor * Number(this.unitController.viewRangeLength) / this.stateController.canvasDisplayWidth;
+        const resolution = (resolutionFactor * Number(this.unitController.viewRangeLength)) / this.stateController.canvasDisplayWidth;
         // Compute the visible rowIds to fetch. Fetch all visible rows if update flag is set,
         // otherwise fetch visible rows with no component, no model or obsolete model.
-        const rowIds = visibleRowIds.filter(rowId => {
+        const rowIds = visibleRowIds.filter((rowId) => {
             const rowComponent = this.rowComponents.get(rowId);
-            return update ||
-                !rowComponent ||
-                !rowComponent.providedModel ||
-                viewRange.start < rowComponent.providedModel.range.start ||
-                viewRange.end > rowComponent.providedModel.range.end ||
-                resolution < rowComponent.providedModel.resolution;
+            return update || !rowComponent || !rowComponent.providedModel || viewRange.start < rowComponent.providedModel.range.start || viewRange.end > rowComponent.providedModel.range.end || resolution < rowComponent.providedModel.resolution;
         });
         if (rowIds.length > 0) {
             const request = { viewRange, resolution, rowIds };
@@ -513,7 +492,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         y: rowComponent.position.y
                     },
                     width: this.stateController.canvasDisplayWidth
-                }
+                };
                 rowComponent.update(opts);
             }
             let lastX: number | undefined;
@@ -534,7 +513,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                         },
                         width: Math.max(1, xEnd - xStart),
                         displayWidth: this.getPixel(BIMath.min(this.unitController.viewRange.end, end)) - this.getPixel(BIMath.max(this.unitController.viewRange.start, start))
-                    }
+                    };
                     el.update(opts);
                 }
                 if (rowComponent && row.gapStyle) {
@@ -542,7 +521,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                 }
                 lastX = Math.max(xStart + 1, this.getPixel(state.range.end - this.unitController.viewRange.start));
                 lastTime = state.range.end;
-                lastBlank = (state.data?.style === undefined);
+                lastBlank = state.data?.style === undefined;
             });
             row?.annotations.forEach((annotation: TimelineChart.TimeGraphAnnotation, elementIndex: number) => {
                 const el = rowComponent.getAnnotationById(annotation.id);
@@ -554,7 +533,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                             x: this.getPixel(start - this.unitController.viewRange.start),
                             y: el.displayObject.y
                         }
-                    }
+                    };
                     el.update(opts);
                 }
             });
@@ -562,39 +541,48 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     }
 
     protected handleSelectedStateChange() {
-        this.selectedStateChangedHandler.forEach(handler => handler(this.selectedStateModel));
+        this.selectedStateChangedHandler.forEach((handler) => handler(this.selectedStateModel));
     }
 
-    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[], range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected addOrUpdateRows(rowData: { rows: TimelineChart.TimeGraphRowModel[]; range: TimelineChart.TimeGraphRange; resolution: number }) {
         if (!this.stateController) {
-            throw ('Add this TimeGraphChart to a container before adding rows.');
+            throw 'Add this TimeGraphChart to a container before adding rows.';
         }
         const providedModel = { range: rowData.range, resolution: rowData.resolution };
-        rowData.rows.forEach(row => {
+        rowData.rows.forEach((row) => {
             const rowComponent = this.rowComponents.get(row.id);
             if (rowComponent) {
                 this.removeChild(rowComponent);
             }
             this.addRow(row.id, row, providedModel);
-        })
+        });
     }
 
-    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected addRow(rowId: number, row?: TimelineChart.TimeGraphRowModel, providedModel?: { range: TimelineChart.TimeGraphRange; resolution: number }) {
         const id = 'row_' + rowId;
         const rowIndex = this.rowIds.indexOf(rowId);
         const rowStyle = this.providers.rowStyleProvider ? this.providers.rowStyleProvider(row) : undefined;
-        const rowComponent = new TimeGraphRow(id, {
-            position: {
-                x: 0,
-                y: (this.rowController.rowHeight * rowIndex)
+        const rowComponent = new TimeGraphRow(
+            id,
+            {
+                position: {
+                    x: 0,
+                    y: this.rowController.rowHeight * rowIndex
+                },
+                width: this.stateController.canvasDisplayWidth,
+                height: this.rowController.rowHeight
             },
-            width: this.stateController.canvasDisplayWidth,
-            height: this.rowController.rowHeight
-        }, rowIndex, row, rowStyle);
+            rowIndex,
+            row,
+            rowStyle
+        );
         rowComponent.displayObject.interactive = true;
-        rowComponent.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
-            this.selectRow(row);
-        }).bind(this));
+        rowComponent.displayObject.on(
+            'click',
+            ((e: PIXI.InteractionEvent) => {
+                this.selectRow(row);
+            }).bind(this)
+        );
         this.addChild(rowComponent);
         this.rowComponents.set(rowId, rowComponent);
         if (this.rowController.selectedRowIndex == rowIndex) {
@@ -605,7 +593,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
     }
 
-    protected updateRow(rowComponent: TimeGraphRow, row: TimelineChart.TimeGraphRowModel, providedModel: { range: TimelineChart.TimeGraphRange, resolution: number }) {
+    protected updateRow(rowComponent: TimeGraphRow, row: TimelineChart.TimeGraphRowModel, providedModel: { range: TimelineChart.TimeGraphRange; resolution: number }) {
         let lastX: number | undefined;
         let lastTime: bigint | undefined;
         let lastBlank = false;
@@ -623,10 +611,10 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             }
             lastX = Math.max(x + 1, this.getPixel(stateModel.range.end - this.unitController.viewRange.start));
             lastTime = stateModel.range.end;
-            lastBlank = (stateModel.data?.style === undefined);
+            lastBlank = stateModel.data?.style === undefined;
         });
         if (this.rowController.selectedRow && this.unitController.selectionRange && this.rowController.selectedRow.id === row.id) {
-            const state = row.states.find(state => {
+            const state = row.states.find((state) => {
                 return this.unitController.selectionRange && state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
             });
             this.selectState(state);
@@ -655,7 +643,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
                     },
                     width: width,
                     displayWidth: width
-                }
+                };
                 gap.update(opts);
             } else {
                 const stateModel = {
@@ -689,7 +677,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         const start = this.getPixel(annotation.range.start - this.unitController.viewRange.start);
         let el: TimeGraphAnnotationComponent | undefined;
         const elementStyle = this.providers.rowAnnotationStyleProvider ? this.providers.rowAnnotationStyleProvider(annotation) : undefined;
-        el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + (rowComponent.height * 0.5) } }, elementStyle, rowComponent);
+        el = new TimeGraphAnnotationComponent(annotation.id, annotation, { position: { x: start, y: rowComponent.position.y + rowComponent.height * 0.5 } }, elementStyle, rowComponent);
         return el;
     }
 
@@ -709,57 +697,72 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         el.displayObject.interactive = true;
 
         var self = this;
-        this._multiClickTimer = debounce(function(){
+        this._multiClickTimer = debounce(function () {
             self._mouseClicks = 0;
             self._recentlyClickedGlobal = null;
         }, this._multiClickTime);
 
-        el.displayObject.on('click', ((e: PIXI.InteractionEvent) => {
-            if (el instanceof TimeGraphStateComponent && !this.mousePanning && !this.mouseZooming) {
-                this.selectState(el.model);
-            }
+        el.displayObject.on(
+            'click',
+            ((e: PIXI.InteractionEvent) => {
+                if (el instanceof TimeGraphStateComponent && !this.mousePanning && !this.mouseZooming) {
+                    this.selectState(el.model);
+                }
 
-            // Mouse clicks count keeps increasing without limit as long as we keep clicking on the same coordinate.
-            if (this._recentlyClickedGlobal && (this._recentlyClickedGlobal.equals(e.data.global))){
-                this._mouseClicks++;
-            } else {
-                // Only clear the timer and reset the click count if the global position is NOT 
-                // the same one as click 1.
-                this._multiClickTimer.cancel();
-                this._mouseClicks = 1;
+                // Mouse clicks count keeps increasing without limit as long as we keep clicking on the same coordinate.
+                if (this._recentlyClickedGlobal && this._recentlyClickedGlobal.equals(e.data.global)) {
+                    this._mouseClicks++;
+                } else {
+                    // Only clear the timer and reset the click count if the global position is NOT
+                    // the same one as click 1.
+                    this._multiClickTimer.cancel();
+                    this._mouseClicks = 1;
 
-                // Store the global position on first click
-                this._recentlyClickedGlobal = cloneDeep(e.data.global);
-            }
+                    // Store the global position on first click
+                    this._recentlyClickedGlobal = cloneDeep(e.data.global);
+                }
 
-            // We can use a debouncer to reset the count when no click occurs for a certain period.
-            this._multiClickTimer();
+                // We can use a debouncer to reset the count when no click occurs for a certain period.
+                this._multiClickTimer();
 
-            // Click callback includes count parameter to record subsequent clicks on the same point
-            if (this.mouseInteractions && this.mouseInteractions.click) {
-                this.mouseInteractions.click(el, e, this._mouseClicks);
-            }
-        }).bind(this));
-        el.displayObject.on('mouseover', ((e: PIXI.InteractionEvent) => {
-            if (this.mouseInteractions && this.mouseInteractions.mouseover) {
-                this.mouseInteractions.mouseover(el, e);
-            }
-        }).bind(this));
-        el.displayObject.on('mouseout', ((e: PIXI.InteractionEvent) => {
-            if (this.mouseInteractions && this.mouseInteractions.mouseout) {
-                this.mouseInteractions.mouseout(el, e);
-            }
-        }).bind(this));
-        el.displayObject.on('mousedown', ((e: PIXI.InteractionEvent) => {
-            if (this.mouseInteractions && this.mouseInteractions.mousedown) {
-                this.mouseInteractions.mousedown(el, e);
-            }
-        }).bind(this));
-        el.displayObject.on('mouseup', ((e: PIXI.InteractionEvent) => {
-            if (this.mouseInteractions && this.mouseInteractions.mouseup) {
-                this.mouseInteractions.mouseup(el, e);
-            }
-        }).bind(this));
+                // Click callback includes count parameter to record subsequent clicks on the same point
+                if (this.mouseInteractions && this.mouseInteractions.click) {
+                    this.mouseInteractions.click(el, e, this._mouseClicks);
+                }
+            }).bind(this)
+        );
+        el.displayObject.on(
+            'mouseover',
+            ((e: PIXI.InteractionEvent) => {
+                if (this.mouseInteractions && this.mouseInteractions.mouseover) {
+                    this.mouseInteractions.mouseover(el, e);
+                }
+            }).bind(this)
+        );
+        el.displayObject.on(
+            'mouseout',
+            ((e: PIXI.InteractionEvent) => {
+                if (this.mouseInteractions && this.mouseInteractions.mouseout) {
+                    this.mouseInteractions.mouseout(el, e);
+                }
+            }).bind(this)
+        );
+        el.displayObject.on(
+            'mousedown',
+            ((e: PIXI.InteractionEvent) => {
+                if (this.mouseInteractions && this.mouseInteractions.mousedown) {
+                    this.mouseInteractions.mousedown(el, e);
+                }
+            }).bind(this)
+        );
+        el.displayObject.on(
+            'mouseup',
+            ((e: PIXI.InteractionEvent) => {
+                if (this.mouseInteractions && this.mouseInteractions.mouseup) {
+                    this.mouseInteractions.mouseup(el, e);
+                }
+            }).bind(this)
+        );
     }
 
     protected updateStateStyle(model: TimelineChart.TimeGraphState) {
@@ -800,7 +803,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         return state;
     }
 
-    selectRow(row: TimelineChart.TimeGraphRowModel | undefined) {
+    selectRow = (row: TimelineChart.TimeGraphRowModel | undefined) => {
         if (this.rowController.selectedRow) {
             delete this.rowController.selectedRow.selected;
             this.updateRowStyle(this.rowController.selectedRow);
@@ -810,6 +813,19 @@ export class TimeGraphChart extends TimeGraphChartLayer {
             this.rowController.selectedRowIndex = this.rowIds.indexOf(row.id);
             row.selected = true;
             this.updateRowStyle(row);
+        }
+    }
+
+    selectRowFromId = (id: number) => {
+        const { rowComponents, selectRow } = this;
+        const row = rowComponents.get(id);
+        const model = row?.model;
+        if (model) {
+            selectRow(model);
+        } else if (row && !model) {
+            // If we're here, the user scrolled down too fast and tried to select before the row loaded.
+            // Just wait half a second and call again.
+            setTimeout(() => this.selectRowFromId(id), 500);
         }
     }
 
@@ -886,7 +902,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         }
         const selectedRow = selectedRowComponent.model;
         this.selectRow(selectedRow);
-        const state = selectedRow?.states.find(state => {
+        const state = selectedRow?.states.find((state) => {
             return this.unitController.selectionRange && state.range.start <= this.unitController.selectionRange.start && state.range.end > this.unitController.selectionRange.start;
         });
         this.selectState(state);
@@ -914,7 +930,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         if (rowIndex * this.rowController.rowHeight < this.rowController.verticalOffset) {
             this.rowController.verticalOffset = rowIndex * this.rowController.rowHeight;
         } else if ((rowIndex + 1) * this.rowController.rowHeight > this.rowController.verticalOffset + this.stateController.canvasDisplayHeight) {
-            this.rowController.verticalOffset = (rowIndex + 1) * this.rowController.rowHeight - this.stateController.canvasDisplayHeight
+            this.rowController.verticalOffset = (rowIndex + 1) * this.rowController.rowHeight - this.stateController.canvasDisplayHeight;
         }
     }
 }
