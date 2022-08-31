@@ -59,9 +59,9 @@ export class TimeGraphChart extends TimeGraphChartLayer {
     protected mouseZoomingStart: bigint;
     protected zoomingSelection?: TimeGraphRectangle;
 
-    private _stageMouseDownHandler: Function;
-    private _stageMouseMoveHandler: Function;
-    private _stageMouseUpHandler: Function;
+    private _stageMouseDownHandler: (event: PIXI.InteractionEvent) => void;
+    private _stageMouseMoveHandler: (event: PIXI.InteractionEvent) => void;
+    private _stageMouseUpHandler: (event: PIXI.InteractionEvent) => void;
 
     private _viewRangeChangedHandler: { (): void; (viewRange: TimelineChart.TimeGraphRange): void; (selectionRange: TimelineChart.TimeGraphRange): void; };
     private _mouseMoveHandler: { (event: MouseEvent): void; (event: Event): void; };

@@ -35,6 +35,6 @@
         "example"
     ],
     "dependencies": {
-        "pixi.js": "^5.0.0"
+        "pixi.js": "^6.5.2"
     }
 }
