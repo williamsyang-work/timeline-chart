@@ -25,7 +25,7 @@ export class TimeGraphChartGrid extends TimeGraphLayer {
     }
 
     update(opts?: TimeGraphAxisLayerOptions) {
-        this.gridComponent.update(opts);
+        // this.gridComponent.update(opts);
     }
 
     destroy() : void {

@@ -1,5 +1,7 @@
 import { TimelineChart } from "./time-graph-model";
-import { TimeGraphRenderController } from "./time-graph-render-controller";
+import { TimeGraphRenderController, RenderEvents } from "./time-graph-render-controller";
+
+window.Test.RenderEvents = RenderEvents;
 
 export class TimeGraphUnitController {
     protected viewRangeChangedHandlers: ((newRange: TimelineChart.TimeGraphRange) => void)[];

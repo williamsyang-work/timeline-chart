@@ -11,7 +11,7 @@ export class TimeGraphChartArrows extends TimeGraphChartLayer {
 
     protected afterAddToContainer() {
         this._updateHandler = (): void => this.update();
-        this.unitController.onViewRangeChanged(this._updateHandler);
+        // this.unitController.onViewRangeChanged(this._updateHandler);
 
         this.rowController.onVerticalOffsetChangedHandler(verticalOffset => {
             this.layer.position.y = -verticalOffset;

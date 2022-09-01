@@ -16,7 +16,7 @@ export class TimeGraphRangeEventsLayer extends TimeGraphLayer {
 
     protected afterAddToContainer() {
         this._viewRangeUpdateHandler = (): void => this.update();
-        this.unitController.onViewRangeChanged(this._viewRangeUpdateHandler);
+        // this.unitController.onViewRangeChanged(this._viewRangeUpdateHandler);
     }
 
     protected addRangeEvent(rangeEvent: TimelineChart.TimeGraphAnnotation) {

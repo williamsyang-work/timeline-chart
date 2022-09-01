@@ -10,6 +10,14 @@ import { TimeGraphChartLayer } from "./time-graph-chart-layer";
 import { BIMath } from "../bigint-utils";
 import { debounce, cloneDeep, DebouncedFunc, isEqual } from 'lodash';
 
+declare global {
+    interface Window { Test: any; }
+}
+
+window.Test = window.Test || {}
+
+window.Test.PIXI = PIXI;
+
 export interface TimeGraphMouseInteractions {
     click?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent, clickCount: number) => void
     mouseover?: (el: TimeGraphComponent<any>, ev: PIXI.InteractionEvent) => void
@@ -87,6 +95,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         private _coarseResolutionFactor = FINE_RESOLUTION_FACTOR) {
         super(id, rowController);
         this.isNavigating = false;
+        window.Test.TimeGraphChart = this;
     }
 
     adjustZoom(zoomPosition: number | undefined, hasZoomedIn: boolean) {
@@ -335,7 +344,7 @@ export class TimeGraphChart extends TimeGraphChartLayer {
         });
 
         this._viewRangeChangedHandler = () => {
-            this.updateScaleAndPosition();
+            // this.updateScaleAndPosition();
             if (this.mouseZooming) {
                 this.updateZoomingSelection();
             }

@@ -32,7 +32,7 @@ export class TimeGraphChartSelectionRange extends TimeGraphLayer {
 
     protected afterAddToContainer() {
         this._viewRangeUpdateHandler = () => {
-            this.updateScaleAndPosition();
+            // this.updateScaleAndPosition();
         };
 
         this._updateHandler = (): void => this.update();

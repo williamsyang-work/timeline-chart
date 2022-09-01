@@ -150,6 +150,15 @@ const timeGraphChartContainer = new TimeGraphContainer({
 }, unitController, chartCanvas);
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
+declare global {
+    interface Window { Test: any; }
+}
+
+window.Test = window.Test || {}
+
+window.Test.TimeGraphContainer = timeGraphChartContainer;
+window.Test.UnitController = unitController;
+
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
 const timeGraphChart = new TimeGraphChart('timeGraphChart', providers, rowController);
 const timeGraphChartArrows = new TimeGraphChartArrows('timeGraphChartArrows', rowController);
