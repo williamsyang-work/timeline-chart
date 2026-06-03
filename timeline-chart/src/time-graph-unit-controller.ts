@@ -1,43 +1,28 @@
 import { TimelineChart } from "./time-graph-model";
-import { TimeGraphRenderController } from "./time-graph-render-controller";
 
 export class TimeGraphUnitController {
 
     protected absoluteRangeChangedHandlers: ((absoluteRange: bigint) => void)[];
     protected _absoluteRange: bigint;
-    
+
     protected viewRangeChangedHandlers: ((oldRange: TimelineChart.TimeGraphRange, newRange: TimelineChart.TimeGraphRange) => void)[];
     protected _viewRange: TimelineChart.TimeGraphRange;
-
-    /**
-     * This determines the world size.
-     * worldRenderFactor = 1 renders one extra viewRange to the left and right,
-     *      so there are three viewRanges rendered.
-     */
-    private _worldRenderFactor = 1;
 
     protected selectionRangeChangedHandlers: ((newRange?: TimelineChart.TimeGraphRange) => void)[];
     protected _selectionRange?: TimelineChart.TimeGraphRange;
 
     protected _offset: bigint = BigInt(0);
 
-    protected _renderer: TimeGraphRenderController;
-    /**
-     *  Create a string from the given number, which is shown in TimeAxis.
-     *  Or return undefined to not show any text for that number.
-     */
     numberTranslator?: (theNumber: bigint) => string | undefined;
     scaleSteps?: number[]
 
     constructor(absoluteRange: bigint, viewRange?: TimelineChart.TimeGraphRange) {
         this._absoluteRange = absoluteRange;
         this._viewRange = viewRange || { start: BigInt(0), end: absoluteRange };
-        
+
         this.absoluteRangeChangedHandlers = [];
         this.viewRangeChangedHandlers = [];
         this.selectionRangeChangedHandlers = [];
-        
-        this._renderer = new TimeGraphRenderController();
     }
 
     protected handleAbsoluteRangeChange() {
@@ -101,7 +86,6 @@ export class TimeGraphUnitController {
     }
 
     set viewRange(newRange: TimelineChart.TimeGraphRange) {
-        // Making a deep copy
         const oldRange = {
             start: this._viewRange.start,
             end: this._viewRange.end
@@ -139,13 +123,4 @@ export class TimeGraphUnitController {
     set offset(offset: bigint) {
         this._offset = offset;
     }
-
-    get worldRenderFactor(): number {
-        return this._worldRenderFactor;
-    }
-
-    set worldRenderFactor(n: number) {
-        this._worldRenderFactor = n;
-    }
-
 }

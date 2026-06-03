@@ -65,7 +65,7 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
         return stepLength;
     }
 
-    protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }, viewport?: boolean) {
+    protected renderVerticalLines(drawLabels: boolean, lineColor: number, lineStyle: (label: string | undefined) => { lineHeight: number }) {
         if (this.unitController.viewRangeLength > 0 && this.stateController.canvasDisplayWidth > 0) {
             let labelWidth = 0;
             if (this.unitController.numberTranslator) {
@@ -79,17 +79,12 @@ export class TimeGraphAxisScale extends TimeGraphComponent<null> {
             const stepLength = BigInt(this.getStepLength(labelWidth));
             const canvasDisplayWidth = this.stateController.canvasDisplayWidth;
             const zoomFactor = this.stateController.zoomFactor;
-            const rangeStart = viewport ? this.stateController.worldRange.start + this.unitController.offset : this.unitController.viewRange.start + this.unitController.offset;
-            const rangeEnd = viewport ? this.stateController.worldRange.end + this.unitController.offset : this.unitController.viewRange.end + this.unitController.offset;
+            const rangeStart = this.unitController.viewRange.start + this.unitController.offset;
+            const rangeEnd = this.unitController.viewRange.end + this.unitController.offset;
             const startTime = (rangeStart / stepLength) * stepLength;
             for (let time = startTime; time <= rangeEnd; time += stepLength) {
                 const xpos = Number(time - rangeStart) * zoomFactor;
-                const worldRatio = this.stateController.worldRangeLength / this.unitController.viewRangeLength;
-                const xposEnd = canvasDisplayWidth * Number(worldRatio);
-                const viewportCondition = xpos >= 0 && xpos < xposEnd;
-                const notViewportCondition = xpos >= 0 && xpos < canvasDisplayWidth;
-                const shouldContinue = (viewport && viewportCondition) || (!viewport && notViewportCondition);
-                if (shouldContinue) {
+                if (xpos >= 0 && xpos < canvasDisplayWidth) {
                     const labelCenter = {
                         x: xpos,
                         y: this._options.position.y

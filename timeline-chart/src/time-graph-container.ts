@@ -64,16 +64,12 @@ export class TimeGraphContainer {
         this._canvas = this.application.view;
 
         this.stateController = new TimeGraphStateController(canvas, unitController);
-        this.unitController.onViewRangeChanged(this.calculatePositionOffset);
-        this.stateController.onWorldRender(this.calculatePositionOffset);
 
         this.layers = [];
 
         this.background = new TimeGraphRectangle({
             opacity: 1,
-            position: {
-                x: 0, y: 0
-            },
+            position: { x: 0, y: 0 },
             height: this.canvas.height,
             width: this.canvas.width,
             color: config.backgroundColor,
@@ -86,11 +82,10 @@ export class TimeGraphContainer {
         return this._canvas;
     }
 
-    // if canvas size has changed displayWidth need to be updated for zoomfactor
     updateCanvas(newWidth: number, newHeight: number, newColor?: number, lineColor?: number) {
         this.config.width = newWidth;
         this.config.height = newHeight;
-        if (newColor) {
+        if (newColor !== undefined) {
             this.config.backgroundColor = newColor;
         }
 
@@ -99,11 +94,9 @@ export class TimeGraphContainer {
         this.application.renderer.resize(newWidth, newHeight);
         this.stateController.updateDisplayWidth();
         this.stateController.updateDisplayHeight();
-        
+
         this.background.update({
-            position: {
-                x: 0, y: 0
-            },
+            position: { x: 0, y: 0 },
             height: newHeight,
             width: newWidth,
             color: newColor
@@ -123,22 +116,7 @@ export class TimeGraphContainer {
 
     destroy() {
         this.layers.forEach(l => l.destroy());
-        this.unitController.removeViewRangeChangedHandler(this.calculatePositionOffset);
         this.stateController.removeHandlers();
         this.application.destroy(true);
     }
-
-    protected calculatePositionOffset = () => {
-        // Currently only using horizontal offset, or "x"
-        const { unitController, stateController } = this;
-        const viewRange = unitController.viewRange;
-        const worldRange = stateController.worldRange;
-        let timeOffset = Number(viewRange.start - worldRange.start);
-        let x = -1 * (timeOffset * stateController.zoomFactor);
-        this.stateController.positionOffset = {
-            x,
-            y: 0
-        }
-    }
-
 }
