@@ -23,12 +23,6 @@ export namespace TimelineChart {
         readonly data?: { [key: string]: any }
         prevPossibleState: bigint
         nextPossibleState: bigint
-        /**
-         * When the gap style is set, gap states will be drawn using this style
-         * in between the model's states when the gap between these states is visible.
-         * These gap states represent the unknown state between known states.
-         * Known blank states (with no style) must then be included in the model.
-         */
         gapStyle?: any;
     }
 
@@ -45,7 +39,6 @@ export namespace TimelineChart {
         destinationId: number
         range: TimeGraphRange
         data?: { [key: string]: any }
-        // Q: Can I select an arrow?
     }
 
     export interface TimeGraphAnnotation {
@@ -55,5 +48,40 @@ export namespace TimelineChart {
         readonly label: string
         selected?: boolean
         readonly data?: { [key: string]: any }
+    }
+
+    export interface TimeGraphStateStyle {
+        color?: number
+        opacity?: number
+        height?: number
+        borderWidth?: number
+        borderColor?: number
+        scale?: number
+    }
+
+    export interface TimeGraphAnnotationStyle {
+        symbol?: string
+        size?: number
+        color?: number
+        opacity?: number
+        verticalAlign?: string
+    }
+
+    export interface TimeGraphRowStyle {
+        backgroundColor?: number
+        backgroundOpacity?: number
+        lineThickness?: number
+        lineColor?: number
+        lineOpacity?: number
+    }
+
+    export interface TimeGraphChartProviders {
+        dataProvider: (range: TimeGraphRange, resolution: number) =>
+            Promise<{ rows: TimeGraphRowModel[], range: TimeGraphRange, resolution: number }>
+            | { rows: TimeGraphRowModel[], range: TimeGraphRange, resolution: number }
+            | undefined
+        stateStyleProvider?: (el: TimeGraphState) => TimeGraphStateStyle | undefined
+        rowAnnotationStyleProvider?: (el: TimeGraphAnnotation) => TimeGraphAnnotationStyle | undefined
+        rowStyleProvider?: (row?: TimeGraphRowModel) => TimeGraphRowStyle | undefined
     }
 }

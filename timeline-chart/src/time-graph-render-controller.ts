@@ -1,12 +1,12 @@
 import { throttle, debounce } from 'lodash';
-import * as PIXI from 'pixi.js-legacy';
+import { Ticker } from 'pixi.js';
 
 const stopRender = debounce(() => {
-    PIXI.Ticker.shared.stop();
+    Ticker.shared.stop();
 }, 1000);
 
 const startRender = throttle(() => {
-    PIXI.Ticker.shared.start();
+    Ticker.shared.start();
     stopRender();
 }, 450, { leading: true });
 

@@ -17,23 +17,12 @@
     "test": "jest --config jest.config.json"
   },
   "dependencies": {
-    "@types/lodash.throttle": "^4.1.4",
-    "glob": "^7.1.6",
-    "keyboard-key": "1.1.0",
-    "lodash.throttle": "^4.1.1",
-    "pixi.js-legacy": "^5.3.3"
+    "lodash": "^4.17.21",
+    "pixi.js": "^8.0.0"
   },
   "devDependencies": {
-    "@types/enzyme": "^3.10.10",
-    "@types/enzyme-adapter-react-16": "^1.0.6",
-    "@types/jest": "^28.0.0",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.6",
-    "jest": "^28.0.0",
-    "jest-canvas-mock": "^2.3.1",
-    "jest-environment-jsdom": "28.0.0",
-    "rimraf": "^5.0.0",
-    "ts-jest": "^29.0.0"
+    "@types/lodash": "^4.17.0",
+    "rimraf": "^5.0.0"
   },
   "homepage": "https://github.com/eclipse-cdt-cloud/timeline-chart",
   "repository": {

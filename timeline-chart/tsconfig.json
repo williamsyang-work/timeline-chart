@@ -6,17 +6,12 @@
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "strictNullChecks": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "downlevelIteration": true,
         "module": "commonjs",
         "moduleResolution": "node",
-        "target": "es5",
-        "jsx": "react",
+        "target": "es2020",
         "lib": [
-            "es6",
-            "dom",
-            "esnext.bigint"
+            "es2020",
+            "dom"
         ],
         "declaration": true,
         "sourceMap": true,

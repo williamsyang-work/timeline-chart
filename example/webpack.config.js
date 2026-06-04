@@ -1,5 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
 
 module.exports = {
     entry: ['./src/index.ts'],
@@ -20,18 +19,9 @@ module.exports = {
                 enforce: "pre",
                 test: /\.js$/,
                 loader: "source-map-loader"
-            },
-            {
-                test: /\.png$/,
-                use: [
-                    'file-loader'
-                ]
             }
         ]
     },
-    plugins: [
-        new webpack.HotModuleReplacementPlugin()
-    ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js']
     },
