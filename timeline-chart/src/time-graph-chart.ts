@@ -1,10 +1,12 @@
-import { Graphics, Container } from "pixi.js";
+import { Container } from "pixi.js";
 import { TimelineChart } from "./time-graph-model";
 import { TimeGraphRowController } from "./time-graph-row-controller";
 import { TimeGraphContainer } from "./time-graph-container";
+import { TimeGraphRow } from "./components/time-graph-row";
 
 export class TimeGraphChart {
     private container: Container;
+    private rowComponents: Map<number, TimeGraphRow> = new Map();
 
     constructor(
         private chartContainer: TimeGraphContainer,
@@ -17,6 +19,7 @@ export class TimeGraphChart {
 
     async render() {
         this.container.removeChildren();
+        this.rowComponents.clear();
 
         const width = this.chartContainer.width;
         const rowHeight = this.rowController.rowHeight;
@@ -27,13 +30,24 @@ export class TimeGraphChart {
         );
         if (!data) return;
 
-        data.rows.forEach((_row, index) => {
-            const y = index * rowHeight + rowHeight / 2;
-            const line = new Graphics();
-            line.moveTo(0, y);
-            line.lineTo(width, y);
-            line.stroke({ width: 1, color: 0x000000 });
-            this.container.addChild(line);
+        console.dir(data);
+
+        data.rows.forEach((row, index) => {
+            const rowStyle = this.providers.rowStyleProvider?.(row);
+            const rowComponent = new TimeGraphRow(
+                `row_${row.id}`,
+                {
+                    position: { x: 0, y: rowHeight * index },
+                    width,
+                    height: rowHeight,
+                },
+                index,
+                row,
+                rowStyle
+            );
+            this.container.addChild(rowComponent.childContainer);
+            this.rowComponents.set(row.id, rowComponent);
         });
     }
+
 }

@@ -6,7 +6,8 @@ module.exports = {
     devServer: {
         static: path.join(__dirname, 'public'),
         allowedHosts: 'all',
-        hot: true
+        hot: true,
+        port: 6969
     },
     module: {
         rules: [

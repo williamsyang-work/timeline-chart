@@ -20,13 +20,9 @@ export class TimeGraphContainer {
 
     protected stateController: TimeGraphStateController;
 
-    private constructor() {}
+    private _initPromise: Promise<void>;
 
-    static async create(config: TimeGraphContainerOptions, unitController: TimeGraphUnitController, extCanvas?: HTMLCanvasElement): Promise<TimeGraphContainer> {
-        const instance = new TimeGraphContainer();
-        instance.config = config;
-        instance.unitController = unitController;
-
+    constructor(protected config: TimeGraphContainerOptions, protected unitController: TimeGraphUnitController, extCanvas?: HTMLCanvasElement) {
         let canvas: HTMLCanvasElement;
         if (!extCanvas) {
             canvas = document.createElement('canvas');
@@ -41,28 +37,30 @@ export class TimeGraphContainer {
         canvas.id = config.id;
         canvas.className = `time-graph-canvas ${config.classNames || ''}`;
 
+        this._canvas = canvas;
+        this._initPromise = this.initPixiApp(canvas);
+    }
+
+    private async initPixiApp(canvas: HTMLCanvasElement): Promise<void> {
         const app = new Application();
         await app.init({
             canvas,
-            width: config.width,
-            height: config.height,
-            backgroundColor: config.backgroundColor ?? 0xffffff,
+            width: this.config.width,
+            height: this.config.height,
+            backgroundColor: this.config.backgroundColor ?? 0xffffff,
             antialias: true,
             resolution: window.devicePixelRatio,
             autoDensity: true,
         });
 
-        instance.application = app;
-        instance.stage = app.stage;
-        instance._canvas = app.canvas as HTMLCanvasElement;
-
-        instance.stateController = new TimeGraphStateController(canvas, unitController);
-
-        return instance;
+        this.application = app;
+        this.stage = app.stage;
+        this.stateController = new TimeGraphStateController(canvas, this.unitController);
     }
 
-    protected config: TimeGraphContainerOptions;
-    protected unitController: TimeGraphUnitController;
+    get initialized(): Promise<void> {
+        return this._initPromise;
+    }
 
     get canvas(): HTMLCanvasElement {
         return this._canvas;
@@ -70,6 +68,14 @@ export class TimeGraphContainer {
 
     addChild(child: ContainerChild) {
         this.stage.addChild(child);
+    }
+
+    addLayers(layers: { initializeLayer(canvas: HTMLCanvasElement, stage: Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController): void }[]) {
+        layers.forEach(layer => this.addLayer(layer));
+    }
+
+    protected addLayer(layer: { initializeLayer(canvas: HTMLCanvasElement, stage: Container, stateController: TimeGraphStateController, unitController: TimeGraphUnitController): void }) {
+        layer.initializeLayer(this._canvas, this.stage, this.stateController, this.unitController);
     }
 
     get width(): number {

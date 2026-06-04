@@ -24,6 +24,8 @@ const styleConfig = {
     cursorColor: 0xb77f09
 }
 
+async function main() {
+
 const styleMap = new Map<string, TimeGraphStateStyle>();
 
 const container = document.getElementById('main');
@@ -127,6 +129,7 @@ const timeGraphAxisContainer = new TimeGraphContainer({
     id: timeGraph.id + '_axis',
     backgroundColor: 0xffffff
 }, unitController, axisCanvas);
+await timeGraphAxisContainer.initialized;
 axisHTMLContainer.appendChild(timeGraphAxisContainer.canvas);
 
 const timeAxisCursors = new TimeGraphAxisCursors('timeGraphAxisCursors', { color: styleConfig.cursorColor });
@@ -146,6 +149,7 @@ const timeGraphChartContainer = new TimeGraphContainer({
     width: styleConfig.mainWidth,
     backgroundColor: styleConfig.chartBackgroundColor
 }, unitController, chartCanvas);
+await timeGraphChartContainer.initialized;
 chartHTMLContainer.appendChild(timeGraphChartContainer.canvas);
 
 const timeGraphChartGridLayer = new TimeGraphChartGrid('timeGraphGrid', rowHeight);
@@ -196,6 +200,7 @@ const naviContainer = new TimeGraphContainer({
     id: 'navi',
     backgroundColor: styleConfig.naviBackgroundColor
 }, unitController);
+await naviContainer.initialized;
 const navi = new TimeGraphNavigator('timeGraphNavigator');
 naviContainer.addLayers([navi]);
 naviEl.appendChild(naviContainer.canvas);
@@ -208,7 +213,12 @@ if (vscrollElement) {
         id: 'vscroll',
         backgroundColor: styleConfig.naviBackgroundColor
     }, unitController);
+    await verticalScrollContainer.initialized;
     const vscroll = new TimeGraphVerticalScrollbar('timeGraphVerticalScrollbar', rowController);
     verticalScrollContainer.addLayers([vscroll]);
     vscrollElement.appendChild(verticalScrollContainer.canvas);
 }
+
+}
+
+main();
